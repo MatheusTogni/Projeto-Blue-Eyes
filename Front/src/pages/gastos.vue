@@ -3,7 +3,7 @@
     <div class="container">
       <v-card class="card-gasto">
         <v-card-title class="title">
-          <v-icon left color="#33b3b3">mdi-cash</v-icon>
+          <v-icon left color="#33b3b3">mdi-cash-remove</v-icon>
           Gastos
         </v-card-title>
         <div class="px-4">
