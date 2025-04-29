@@ -3,8 +3,8 @@
     <div class="container">
       <v-card class="card-gasto">
         <v-card-title class="title">
-          <v-icon left color="#33b3b3">mdi-cash</v-icon>
-          Gastos
+          <v-icon left color="#33b3b3">mdi-cart-variant</v-icon>
+          Mercado
         </v-card-title>
         <div class="px-4">
           <v-list class="transparent scrollable-list" bg-color="transparent">
@@ -32,21 +32,16 @@
             </v-list-item>
           </v-list>
         </div>
-
         <v-divider class="my-3 mx-4"></v-divider>
-
-        <v-card class="subtitle">
-          <span class="total-gastos">Total: {{ totalGastos }}</span>
-        </v-card>
         <v-card class="input-card mb-6 mt-6">
           <v-row align="center" class="pa-4">
             <v-col cols="12" md="8" lg="8">
               <v-text-field
-                label="Descrição"
+                label="Item"
                 variant="outlined"
                 density="comfortable"
                 color="#33b3b3"
-                prepend-inner-icon="mdi-text-box"
+                prepend-inner-icon="mdi-cart-arrow-down"
                 v-model="descricao"
                 hide-details
                 single-line
@@ -200,13 +195,10 @@ export default defineComponent({
 
   computed: {
     totalGastos(): string {
-      // Soma os valores como números
       const total = this.gastos.reduce(
         (sum, gasto) => sum + Number(gasto.VALOR_GASTO),
         0
       );
-
-      // Formata o total como moeda brasileira
       return total.toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
@@ -216,7 +208,7 @@ export default defineComponent({
 
   methods: {
     formatCurrency(value: string | number): string {
-      const numberValue = Number(value.toString().replace(/\D/g, "")) / 100; // Remove caracteres não numéricos e divide por 100
+      const numberValue = Number(value.toString().replace(/\D/g, "")) / 100;
       return numberValue
         .toLocaleString("pt-BR", {
           style: "currency",

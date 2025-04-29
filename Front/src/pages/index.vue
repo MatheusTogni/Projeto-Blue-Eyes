@@ -3,8 +3,8 @@
     <div class="container">
       <v-card class="card-gasto">
         <v-card-title class="title">
-          <v-icon left color="#33b3b3">mdi-cash-remove</v-icon>
-          Controle de Gastos
+          <v-icon left color="#33b3b3">mdi-cash</v-icon>
+          Gastos
         </v-card-title>
         <div class="px-4">
           <v-list class="transparent scrollable-list" bg-color="transparent">
@@ -65,6 +65,7 @@
                 hide-details
                 single-line
                 @input="handleInput"
+                @keydown.enter="addGasto"
               />
             </v-col>
 
@@ -477,7 +478,7 @@ export default defineComponent({
 }
 
 .scrollable-list {
-  max-height: 310px;
+  max-height: 400px;
   overflow-y: auto;
   padding-right: 4px;
 }

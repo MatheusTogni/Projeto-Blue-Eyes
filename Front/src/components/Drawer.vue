@@ -38,6 +38,7 @@ export default defineComponent({
     const menuItems = [
       { title: "Gastos", icon: "mdi-cash", route: "/gastos" },
       { title: "Tarefas", icon: "mdi-clipboard-check-outline", route: "/tarefas" },
+      { title: "Mercado", icon: "mdi-cart-variant", route: "/mercado" },
       { title: "Sair", icon: "mdi-logout", route: "/login" },
     ];
 

@@ -67,7 +67,7 @@ export default defineConfig({
       },
       manifest: {
         name: 'Meu App PWA',
-        short_name: 'MeuApp',
+        short_name: 'Blue Eyes',
         description: 'Um app Vue 3 com Vuetify e PWA!',
         theme_color: '#4DBA87',
         background_color: '#ffffff',
@@ -76,8 +76,8 @@ export default defineConfig({
         scope: '.',
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
+            src: 'pwa-256x256.png',
+            sizes: '256x256',
             type: 'image/png',
           },
           {

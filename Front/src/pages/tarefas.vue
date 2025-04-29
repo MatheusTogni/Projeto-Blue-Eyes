@@ -275,7 +275,7 @@ export default defineComponent({
 }
 
 .scrollable-list {
-  max-height: 380px;
+  max-height: 400px;
   overflow-y: auto;
   padding-right: 4px;
 }
