@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import gastoRoutes from "./routes/gastoRouter"
 import tarefaRouter from "./routes/tarefaRouter"
+import mercadoRoutes from "./routes/mercadoRouter"
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const PORT = process.env.PORT || 3002;
 
 app.use("/gasto", gastoRoutes);
 app.use("/tarefa", tarefaRouter)
+app.use("/mercado", mercadoRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

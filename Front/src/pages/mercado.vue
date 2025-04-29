@@ -1,14 +1,14 @@
 <template>
   <Drawer>
     <div class="container">
-      <v-card class="card-gasto">
+      <v-card class="card-mercado">
         <v-card-title class="title">
           <v-icon left color="#33b3b3">mdi-cart-variant</v-icon>
           Mercado
         </v-card-title>
         <div class="px-4">
           <v-list class="transparent scrollable-list" bg-color="transparent">
-            <v-list-item v-for="item in gastos" :key="item.ID_GASTO" class="gasto-item">
+            <v-list-item v-for="item in gastos" :key="item.ID_GASTO" class="mercado-item">
               <v-btn class="pa-0" variant="text" @click="openDialogEditDesc(item)">
                 <v-list-item-title class="descricao">{{
                   item.DESC_GASTO
@@ -33,6 +33,10 @@
           </v-list>
         </div>
         <v-divider class="my-3 mx-4"></v-divider>
+
+        <v-card class="subtitle">
+          <span class="total-mercado">Total: {{ totalGastos }}</span>
+        </v-card>
         <v-card class="input-card mb-6 mt-6">
           <v-row align="center" class="pa-4">
             <v-col cols="12" md="8" lg="8">
@@ -248,7 +252,7 @@ export default defineComponent({
         });
 
         const data = await resp.json();
-        await this.getAllGastos();
+        await this.getAllItems();
         this.descricao = "";
         this.valor = null;
         if (data.success) {
@@ -303,7 +307,7 @@ export default defineComponent({
           body: JSON.stringify(item),
         });
         const data = await resp.json();
-        await this.getAllGastos();
+        await this.getAllItems();
         this.confirmEditDesc = false;
         if (data.success) {
           eventBus.value.showToast(data.message, "success");
@@ -326,7 +330,7 @@ export default defineComponent({
           body: JSON.stringify(item),
         });
         const data = await resp.json();
-        await this.getAllGastos();
+        await this.getAllItems();
         this.confirmEditValue = false;
         if (data.success) {
           eventBus.value.showToast(data.message, "success");
@@ -355,7 +359,7 @@ export default defineComponent({
 
         const data = await resp.json();
         if (data.success) {
-          await this.getAllGastos();
+          await this.getAllItems();
           eventBus.value.showToast(data.message, "success");
         } else {
           eventBus.value.showToast(data.message, "error");
@@ -368,9 +372,9 @@ export default defineComponent({
       }
     },
 
-    async getAllGastos() {
+    async getAllItems() {
       try {
-        const resp = await fetch("http://localhost:3002/gasto/get-gastos", {
+        const resp = await fetch("http://localhost:3002/mercado/get-items", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -398,7 +402,7 @@ export default defineComponent({
     },
   },
   async mounted() {
-    await this.getAllGastos();
+    await this.getAllItems();
   },
 });
 </script>
@@ -409,14 +413,14 @@ export default defineComponent({
   padding: 20px;
 }
 
-.card-gasto {
+.card-mercado {
   background: #212121 !important;
   border: 2px solid #33b3b3;
   border-radius: 16px !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
 }
 
-.total-gastos {
+.total-mercado {
   display: block;
   margin-top: 8px;
   color: #33b3b3;
@@ -446,7 +450,7 @@ export default defineComponent({
   font-size: 28px;
 }
 
-.gasto-item {
+.mercado-item {
   background: #2d2d2d !important;
   margin-bottom: 8px;
   border-radius: 8px;
