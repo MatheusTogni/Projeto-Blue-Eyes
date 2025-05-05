@@ -173,28 +173,34 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import Drawer from "@/components/Drawer.vue";
 import { eventBus } from "@/event-bus";
+import type { Gasto } from '@/interfaces/Gasto';
+
 export default defineComponent({
   components: {
     Drawer,
-    eventBus,
   },
   data() {
     return {
       descricao: "",
-      valor: null as string | null,
-      gastos: [] as Array<{ ID_GASTO: number; DESC_GASTO: string; VALOR_GASTO: number }>,
+      valor: " " as string,
+      gastos: [] as Gasto[],  
       confirmDelete: false,
       confirmEditDesc: false,
       confirmEditValue: false,
-      selectedItem: null as {
-        DESC_GASTO: string;
-        VALOR_GASTO: number;
-        ID_GASTO: number;
-      } | null,
-      selectedItemEdit: { DESC_GASTO: "", VALOR_GASTO: 0, ID_GASTO: 0 },
-      selectedValueEdit: { DESC_GASTO: "", VALOR_GASTO: 0, ID_GASTO: 0 },
+      selectedItem: null as Gasto | null,
+      selectedItemEdit: {
+        DESC_GASTO: "",
+        VALOR_GASTO: 0,
+        ID_GASTO: 0,
+      } as Gasto,
+      selectedValueEdit: {
+        DESC_GASTO: "",
+        VALOR_GASTO: 0,
+        ID_GASTO: 0,
+      } as Gasto,
     };
   },
 
@@ -258,7 +264,7 @@ export default defineComponent({
         const data = await resp.json();
         await this.getAllGastos();
         this.descricao = "";
-        this.valor = null;
+        this.valor = "";
         if (data.success) {
           eventBus.value.showToast(data.message, "success");
         } else {

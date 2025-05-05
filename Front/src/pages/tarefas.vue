@@ -96,17 +96,17 @@
 <script lang="ts">
 import Drawer from "@/components/Drawer.vue";
 import { eventBus } from "@/event-bus";
+import type { Tarefa } from '@/interfaces/Tarefas';
 export default defineComponent({
   components: {
     Drawer,
-    eventBus,
   },
   data() {
     return {
       descricao: "",
       confirmEditDesc: false,
-      selectedItemEdit: {} as { ID_TAREFA: number; DESC_TAREFA: string },
-      tarefas: [] as Array<{ ID_TAREFA: number; DESC_TAREFA: string }>,
+      selectedItemEdit: {} as Tarefa,
+      tarefas: [] as Tarefa[],
     };
   },
   methods: {
@@ -156,7 +156,6 @@ export default defineComponent({
       let params = {
         id_tarefa: tarefa.ID_TAREFA,
       };
-      console.log("params", params);
       try {
         const response = await fetch("http://localhost:3002/tarefa/end-tarefa", {
           method: "POST",

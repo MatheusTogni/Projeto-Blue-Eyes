@@ -1,14 +1,14 @@
 import pool from '../db';
 
 const mercadoService = {
-  addGasto: async (params: any) => {
+  async addItem(params: any) {
     try {
       const sql = `
-        INSERT INTO "GASTOS" ("DESC_GASTO", "VALOR_GASTO", "DATA_GASTO")
-        VALUES ($1, $2, $3)
+        INSERT INTO "MERCADO" ("DESC_MERCADO", "VALOR_MERCADO")
+        VALUES ($1, $2)
         RETURNING *;
       `;
-      const values = [params.descricao, params.valor, params.data];
+      const values = [params.descricao, params.valor];
       const resp = await pool.query(sql, values);
 
       return resp.rows[0];
@@ -18,12 +18,12 @@ const mercadoService = {
     }
   },
 
-  deleteGasto: async (params: any) => {
+  async deleteItem(params: any) {
     try {
       const sql = `
-        DELETE FROM "GASTOS" WHERE "ID_GASTO" = $1
+        DELETE FROM "MERCADO" WHERE "ID_MERCADO" = $1
       `;
-      const values = [params.id];
+      const values = [params.ID_MERCADO];
       const resp = await pool.query(sql, values);
 
       return resp.rows[0];
@@ -33,7 +33,7 @@ const mercadoService = {
     }
   },
 
-  getItens: async () => {
+  async getItens() {
     try {
       const sql = `
         SELECT "DESC_MERCADO", "VALOR_MERCADO", "ID_MERCADO" FROM "MERCADO"
@@ -46,14 +46,14 @@ const mercadoService = {
     }
   },
 
-  editGasto: async (params: any) => {
+  async editItem(params: any) {
     try {
       const sql = `
-        UPDATE "GASTOS" 
-        SET "DESC_GASTO" = $1 
-        WHERE "ID_GASTO" = $2
+        UPDATE "MERCADO" 
+        SET "DESC_MERCADO" = $1 
+        WHERE "ID_MERCADO" = $2
       `;
-      const values = [params.DESC_GASTO, params.ID_GASTO];
+      const values = [params.DESC_MERCADO, params.ID_MERCADO];
       const resp = await pool.query(sql, values);
 
       return resp.rows[0];
@@ -63,19 +63,38 @@ const mercadoService = {
     }
   },
 
-  editValorGasto: async (params: any) => {
+  async editValor(params: any) {
     try {
       const sql = `
-        UPDATE "GASTOS" 
-        SET "VALOR_GASTO" = $1 
-        WHERE "ID_GASTO" = $2
+        UPDATE "MERCADO" 
+        SET "VALOR_MERCADO" = $1 
+        WHERE "ID_MERCADO" = $2
       `;
-      const values = [params.VALOR_GASTO, params.ID_GASTO];
+      const values = [params.VALOR_MERCADO, params.ID_MERCADO];
       const resp = await pool.query(sql, values);
 
       return resp.rows[0];
     } catch (error) {
       console.error("Erro ao editar valor do item:", error);
+      throw error;
+    }
+  },
+
+  async endShopping(params: any) {
+    try {
+      const sqlInsert = `
+        INSERT INTO "GASTOS" ("DESC_GASTO", "VALOR_GASTO")
+        VALUES ('Mercado', $1)
+      `;
+      const values = [params.total];
+      const resp = await pool.query(sqlInsert, values);
+
+      const sqlDelete = `DELETE FROM "MERCADO"
+      `
+      await pool.query(sqlDelete)
+      return resp.rows[0];
+    } catch (error) {
+      console.error("Erro ao finalizar as compras:", error);
       throw error;
     }
   }

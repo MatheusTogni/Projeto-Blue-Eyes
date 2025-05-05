@@ -2,49 +2,52 @@ import { Request, Response } from 'express';
 import mercadoService from '../services/mercadoService';
 
 const mercadoController = {
-    addGasto: async (req: Request, res: Response) => {
+    async addItem(req: Request, res: Response) {
         try {
-            const resp = await mercadoService.addGasto(req.body);
-            res.status(200).json({ success: true, resp, message: 'Gasto adicionado com sucesso!' });
+            const resp = await mercadoService.addItem(req.body);
+            res.status(200).json({ resp, message: 'Item adicionado com sucesso!' });
         } catch (error) {
-            console.error('Erro ao adicionar gasto:', error);
-            res.status(500).json({ success: false, message: 'Erro ao adicionar gasto!' });
+            res.status(500).json({ message: 'Erro ao adicionar item!' });
         }
     },
-    deleteGasto: async (req: Request, res: Response) => {
+    async deleteItem(req: Request, res: Response) {
         try {
-            const resp = await mercadoService.deleteGasto(req.body);
-            res.status(200).json({ success: true, resp, message: 'Gasto deletado com sucesso!' });
+            const resp = await mercadoService.deleteItem(req.body);
+            res.status(200).json({ resp, message: 'Item deletado com sucesso!' });
         } catch (error) {
-            console.error('Erro ao deletar gasto:', error);
-            res.status(500).json({ success: false, message: 'Erro ao deletar gasto!' });
+            res.status(500).json({ message: 'Erro ao deletar item!' });
         }
     },
-    getItens: async (req: Request, res: Response) => {
+    async getItens(req: Request, res: Response) {
         try {
             const resp = await mercadoService.getItens();
-            res.status(200).json({ success: true, resp });
+            res.status(200).json({ resp });
         } catch (error) {
-            console.error('Erro ao buscar gastos!', error);
-            res.status(500).json({ success: false, message: 'Erro ao buscar gastos!' });
+            res.status(500).json({ message: 'Erro ao buscar itens!' });
         }
     },
-    editGasto: async (req: Request, res: Response) => {
+    async editItem(req: Request, res: Response) {
         try {
-            const resp = await mercadoService.editGasto(req.body);
-            res.status(200).json({ success: true, resp, message: 'Descrição do Gasto editada com sucesso!' });
+            const resp = await mercadoService.editItem(req.body);
+            res.status(200).json({ success: true, resp, message: 'Descrição do Item editada com sucesso!' });
         } catch (error) {
-            console.error('Erro ao editar Descrição do Gasto!', error);
-            res.status(500).json({ success: false, message: 'Erro ao editar Descrição do Gasto!' });
+            res.status(500).json({ success: false, message: 'Erro ao editar Descrição do Item!' });
         }
     },
-    editValorGasto: async (req: Request, res: Response) => {
+    async editValor(req: Request, res: Response) {
         try {
-            const resp = await mercadoService.editValorGasto(req.body);
-            res.status(200).json({ success: true, resp, message: 'Valor do Gasto editada com sucesso!' });
+            const resp = await mercadoService.editValor(req.body);
+            res.status(200).json({ success: true, resp, message: 'Valor do Item editado com sucesso!' });
         } catch (error) {
-            console.error('Erro ao editar Valor do Gasto!', error);
-            res.status(500).json({ success: false, message: 'Erro ao editar Valor do Gasto!' });
+            res.status(500).json({ success: false, message: 'Erro ao editar Valor do Item!' });
+        }
+    },
+    async endShopping(req: Request, res: Response) {
+        try {
+            const resp = await mercadoService.endShopping(req.body);
+            res.status(200).json({ success: true, resp, message: 'Compras Finalizadas com sucesso!' });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Erro ao finalizar Compras' });
         }
     },
 };

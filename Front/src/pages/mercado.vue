@@ -8,10 +8,14 @@
         </v-card-title>
         <div class="px-4">
           <v-list class="transparent scrollable-list" bg-color="transparent">
-            <v-list-item v-for="item in gastos" :key="item.ID_GASTO" class="mercado-item">
+            <v-list-item
+              v-for="item in items"
+              :key="item.ID_MERCADO"
+              class="mercado-item"
+            >
               <v-btn class="pa-0" variant="text" @click="openDialogEditDesc(item)">
                 <v-list-item-title class="descricao">{{
-                  item.DESC_GASTO
+                  item.DESC_MERCADO
                 }}</v-list-item-title>
               </v-btn>
               <template v-slot:append>
@@ -19,7 +23,7 @@
                   <span class="valor">
                     R$
                     {{
-                      item.VALOR_GASTO.toLocaleString("pt-BR", {
+                      item.VALOR_MERCADO.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
                       })
                     }}</span
@@ -35,11 +39,11 @@
         <v-divider class="my-3 mx-4"></v-divider>
 
         <v-card class="subtitle">
-          <span class="total-mercado">Total: {{ totalGastos }}</span>
+          <span class="total-mercado">Total: {{ totalItems }}</span>
         </v-card>
         <v-card class="input-card mb-6 mt-6">
           <v-row align="center" class="pa-4">
-            <v-col cols="12" md="8" lg="8">
+            <v-col cols="12" md="7" lg="7">
               <v-text-field
                 label="Item"
                 variant="outlined"
@@ -49,7 +53,7 @@
                 v-model="descricao"
                 hide-details
                 single-line
-                @keydown.enter="addGasto"
+                @keydown.enter="addItem"
               ></v-text-field>
             </v-col>
 
@@ -64,7 +68,7 @@
                 hide-details
                 single-line
                 @input="handleInput"
-                @keydown.enter="addGasto"
+                @keydown.enter="addItem"
               />
             </v-col>
 
@@ -76,8 +80,21 @@
                 size="large"
                 elevation="2"
                 fab
-                @click="addGasto"
+                @click="addItem"
                 >+</v-btn
+              >
+            </v-col>
+
+            <v-col cols="12" md="1" lg="1" class="text-center">
+              <v-btn
+                class="add-button"
+                color="success"
+                block
+                size="large"
+                elevation="2"
+                :disabled="items.length == 0"
+                @click="openDialogEndShopping"
+                >✔</v-btn
               >
             </v-col>
           </v-row>
@@ -85,8 +102,8 @@
       </v-card>
       <v-dialog v-model="confirmDelete" max-width="600px">
         <v-card>
-          <span class="title">Excluir Gasto</span>
-          <v-card-text>Você tem certeza que deseja excluir este gasto?</v-card-text>
+          <span class="title">Excluir Item</span>
+          <v-card-text>Você tem certeza que deseja excluir este item?</v-card-text>
           <v-card-actions class="d-flex justify-end">
             <v-btn
               style="background-color: grey; color: white"
@@ -96,7 +113,7 @@
             </v-btn>
             <v-btn
               style="background-color: #f44336; color: white"
-              @click="selectedItem && deleteGasto(selectedItem)"
+              @click="selectedItem && deleteItem(selectedItem)"
             >
               Excluir
             </v-btn>
@@ -114,9 +131,9 @@
             density="comfortable"
             color="#33b3b3"
             prepend-inner-icon="mdi-text-box"
-            v-model="selectedItemEdit.DESC_GASTO"
+            v-model="selectedItemEdit.DESC_MERCADO"
             hide-details
-            @keydown.enter="editGasto(selectedItemEdit)"
+            @keydown.enter="selectedItemEdit && editItem(selectedItemEdit)"
             single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
@@ -128,8 +145,24 @@
             </v-btn>
             <v-btn
               style="background-color: #33b3b3; color: white"
-              @click="editGasto(selectedItemEdit)"
+              @click="selectedItemEdit && editItem(selectedItemEdit)"
             >
+              Confirmar
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog v-model="confirmEndShopping" max-width="600px">
+        <v-card class="pa-2">
+          <span class="title">Finalizar Compras</span>
+          <v-card-actions class="d-flex justify-end mt-4">
+            <v-btn
+              style="background-color: grey; color: white"
+              @click="confirmEndShopping = false"
+            >
+              Cancelar
+            </v-btn>
+            <v-btn style="background-color: #33b3b3; color: white" @click="endShopping">
               Confirmar
             </v-btn>
           </v-card-actions>
@@ -146,9 +179,10 @@
             density="comfortable"
             color="#33b3b3"
             prepend-inner-icon="mdi-cash"
-            v-model="selectedValueEdit.VALOR_GASTO"
+            v-model="selectedValueEdit.VALOR_MERCADO"
             hide-details
-            @keydown.enter="editValor(selectedValueEdit)"
+            @input="handleInputValue"
+            @keydown.enter="selectedValueEdit && editValor(selectedValueEdit)"
             single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
@@ -160,7 +194,7 @@
             </v-btn>
             <v-btn
               style="background-color: #33b3b3; color: white"
-              @click="editValor(selectedValueEdit)"
+              @click="selectedValueEdit && editValor(selectedValueEdit)"
             >
               Confirmar
             </v-btn>
@@ -174,36 +208,31 @@
 <script lang="ts">
 import Drawer from "@/components/Drawer.vue";
 import { eventBus } from "@/event-bus";
+import type { Mercado } from "@/interfaces/Mercado";
 export default defineComponent({
   components: {
     Drawer,
-    eventBus,
   },
   data() {
     return {
       descricao: "",
-      valor: null as string | null,
-      gastos: [] as Array<{ ID_GASTO: number; DESC_GASTO: string; VALOR_GASTO: number }>,
+      valor: "",
+      items: [] as Mercado[],
       confirmDelete: false,
       confirmEditDesc: false,
       confirmEditValue: false,
-      selectedItem: null as {
-        DESC_GASTO: string;
-        VALOR_GASTO: number;
-        ID_GASTO: number;
-      } | null,
-      selectedItemEdit: { DESC_GASTO: "", VALOR_GASTO: 0, ID_GASTO: 0 },
-      selectedValueEdit: { DESC_GASTO: "", VALOR_GASTO: 0, ID_GASTO: 0 },
+      confirmEndShopping: false,
+      total: 0,
+      selectedItem: null as Mercado | null,
+      selectedItemEdit: null as any,
+      selectedValueEdit: null as any,
     };
   },
 
   computed: {
-    totalGastos(): string {
-      const total = this.gastos.reduce(
-        (sum, gasto) => sum + Number(gasto.VALOR_GASTO),
-        0
-      );
-      return total.toLocaleString("pt-BR", {
+    totalItems(): string {
+      this.total = this.items.reduce((sum, item) => sum + Number(item.VALOR_MERCADO), 0);
+      return this.total.toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
       });
@@ -227,7 +256,97 @@ export default defineComponent({
       this.valor = this.formatCurrency(input.value);
     },
 
-    async addGasto() {
+    handleInputValue(event: Event) {
+      const input = event.target as HTMLInputElement;
+      this.selectedValueEdit.VALOR_MERCADO = this.formatCurrency(input.value);
+    },
+
+    openDialog(item: Mercado) {
+      this.selectedItem = item;
+      this.confirmDelete = true;
+    },
+
+    openDialogEditDesc(item: Mercado) {
+      this.selectedItemEdit = { ...item };
+      this.confirmEditDesc = true;
+
+      this.$nextTick(() => {
+        (this.$refs.editDescField as HTMLInputElement).focus();
+      });
+    },
+
+    openDialogEditValue(item: Mercado) {
+      this.selectedValueEdit = { ...item };
+      this.confirmEditValue = true;
+
+      this.$nextTick(() => {
+        (this.$refs.editValueField as HTMLInputElement).focus();
+      });
+    },
+
+    openDialogEndShopping() {
+      this.confirmEndShopping = true;
+    },
+
+    async editItem(item: Mercado) {
+      if (
+        !this.selectedItemEdit.DESC_MERCADO ||
+        this.selectedItemEdit.DESC_MERCADO.trim() === ""
+      ) {
+        eventBus.value.showToast("Por favor preencha a nova descrição do item", "info");
+        return;
+      }
+      await this.HTTP("post", "/mercado/edit-item", item)
+        .then(async (resp) => {
+          eventBus.value.showToast(resp.message, "success");
+          this.confirmEditDesc = false;
+          await this.getAllItems();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
+    },
+
+    async deleteItem(item: Mercado) {
+      await this.HTTP("delete", "/mercado/delete-item", item)
+        .then(async (resp) => {
+          eventBus.value.showToast(resp.message, "success");
+          this.confirmDelete = false;
+          await this.getAllItems();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
+    },
+
+    async editValor(item: Mercado) {
+      const valorFormatado = this.selectedValueEdit.VALOR_MERCADO?.toString() || "";
+      const valorNumerico = Number(
+        valorFormatado.replace(/\s/g, "").replace(/\./g, "").replace(",", ".")
+      );
+
+      if (!valorNumerico || valorNumerico === 0) {
+        eventBus.value.showToast("Por favor preencha o novo valor do item", "info");
+        return;
+      }
+
+      item.VALOR_MERCADO = valorNumerico;
+
+      await this.HTTP("post", "/mercado/edit-valor", item)
+        .then(async (resp) => {
+          eventBus.value.showToast(resp.message, "success");
+          this.confirmEditValue = false;
+          await this.getAllItems();
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
+    },
+
+    async addItem() {
       const valorNumerico = this.valor
         ? Number(this.valor.replace(/\./g, "").replace(",", "."))
         : 0;
@@ -239,166 +358,44 @@ export default defineComponent({
       let params = {
         descricao: this.descricao,
         valor: valorNumerico,
-        data: new Date().toISOString().slice(0, 10),
       };
 
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/add-gasto", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
+      await this.HTTP("post", "/mercado/add-item", params)
+        .then((resp) => {
+          eventBus.value.showToast(resp.message, "success");
+          this.getAllItems();
+          (this.descricao = ""), (this.valor = "");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
         });
-
-        const data = await resp.json();
-        await this.getAllItems();
-        this.descricao = "";
-        this.valor = null;
-        if (data.success) {
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao adicionar gasto.", "error");
-      }
-    },
-
-    openDialog(item: { DESC_GASTO: string; VALOR_GASTO: number; ID_GASTO: number }) {
-      this.selectedItem = item;
-      this.confirmDelete = true;
-    },
-
-    openDialogEditDesc(item: {
-      DESC_GASTO: string;
-      VALOR_GASTO: number;
-      ID_GASTO: number;
-    }) {
-      this.selectedItemEdit = { ...item };
-      this.confirmEditDesc = true;
-
-      this.$nextTick(() => {
-        (this.$refs.editDescField as HTMLInputElement).focus();
-      });
-    },
-
-    openDialogEditValue(item: {
-      DESC_GASTO: string;
-      VALOR_GASTO: number;
-      ID_GASTO: number;
-    }) {
-      this.selectedValueEdit = { ...item };
-      this.confirmEditValue = true;
-
-      this.$nextTick(() => {
-        (this.$refs.editValueField as HTMLInputElement).focus();
-      });
-    },
-
-    async editGasto(item: { DESC_GASTO: string; VALOR_GASTO: number; ID_GASTO: number }) {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/edit-gasto", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(item),
-        });
-        const data = await resp.json();
-        await this.getAllItems();
-        this.confirmEditDesc = false;
-        if (data.success) {
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao editar gasto.", "error");
-      }
-    },
-
-    async editValor(item: { DESC_GASTO: string; VALOR_GASTO: number; ID_GASTO: number }) {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/edit-valor", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(item),
-        });
-        const data = await resp.json();
-        await this.getAllItems();
-        this.confirmEditValue = false;
-        if (data.success) {
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao editar valor.", "error");
-      }
-    },
-
-    async deleteGasto(item: {
-      DESC_GASTO: string;
-      VALOR_GASTO: number;
-      ID_GASTO: number;
-    }) {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/delete-gasto", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: item.ID_GASTO }),
-        });
-
-        const data = await resp.json();
-        if (data.success) {
-          await this.getAllItems();
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-        this.selectedItem = null;
-        this.confirmDelete = false;
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao deletar gasto.", "error");
-      }
     },
 
     async getAllItems() {
       try {
-        const resp = await fetch("http://localhost:3002/mercado/get-items", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await resp.json();
-        if (data.success) {
-          this.gastos = data.resp
-            .map(
-              (gasto: { ID_GASTO: number; DESC_GASTO: string; VALOR_GASTO: number }) => ({
-                ID_GASTO: gasto.ID_GASTO,
-                DESC_GASTO: gasto.DESC_GASTO,
-                VALOR_GASTO: gasto.VALOR_GASTO,
-              })
-            )
-            .sort((a: any, b: any) => a.ID_GASTO - b.ID_GASTO);
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
+        const resp = await this.HTTP("get", "/mercado/get-items");
+        this.items = resp.resp;
       } catch (error) {
         console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao buscar gastos.", "error");
+        eventBus.value.showToast("Erro ao buscar items.", "error");
       }
+    },
+
+    async endShopping() {
+      let params = {
+        total: this.total.toFixed(2),
+      };
+      await this.HTTP("post", "/mercado/end-shopping", params)
+        .then((resp) => {
+          eventBus.value.showToast(resp.message, "success");
+          this.getAllItems();
+          this.confirmEndShopping = false;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
     },
   },
   async mounted() {

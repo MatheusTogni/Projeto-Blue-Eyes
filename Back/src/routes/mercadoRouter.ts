@@ -3,10 +3,11 @@ import mercadoController from '../controllers/mercadoController';
 
 const router = Router();
 
-router.post('/add-gasto', mercadoController.addGasto)
-router.post('/edit-gasto', mercadoController.editGasto)
-router.post('/edit-valor', mercadoController.editValorGasto)
-router.delete('/delete-gasto', mercadoController.deleteGasto)
+router.post('/add-item', mercadoController.addItem)
+router.post('/edit-item', mercadoController.editItem)
+router.post('/edit-valor', mercadoController.editValor)
+router.post('/end-shopping', mercadoController.endShopping)
+router.delete('/delete-item', mercadoController.deleteItem)
 router.get('/get-items', mercadoController.getItens)
 
 
