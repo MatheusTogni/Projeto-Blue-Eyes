@@ -5,7 +5,7 @@ const mercadoController = {
     async addItem(req: Request, res: Response) {
         try {
             const resp = await mercadoService.addItem(req.body);
-            res.status(200).json({ resp, message: 'Item adicionado com sucesso!' });
+            res.status(200).json({ resp, message: 'Item adicionado com sucesso' });
         } catch (error) {
             res.status(500).json({ message: 'Erro ao adicionar item!' });
         }
@@ -13,7 +13,7 @@ const mercadoController = {
     async deleteItem(req: Request, res: Response) {
         try {
             const resp = await mercadoService.deleteItem(req.body);
-            res.status(200).json({ resp, message: 'Item deletado com sucesso!' });
+            res.status(200).json({ resp, message: 'Item deletado com sucesso' });
         } catch (error) {
             res.status(500).json({ message: 'Erro ao deletar item!' });
         }
@@ -29,7 +29,7 @@ const mercadoController = {
     async editItem(req: Request, res: Response) {
         try {
             const resp = await mercadoService.editItem(req.body);
-            res.status(200).json({ success: true, resp, message: 'Descrição do Item editada com sucesso!' });
+            res.status(200).json({ success: true, resp, message: 'Descrição do Item editada com sucesso' });
         } catch (error) {
             res.status(500).json({ success: false, message: 'Erro ao editar Descrição do Item!' });
         }
@@ -37,7 +37,7 @@ const mercadoController = {
     async editValor(req: Request, res: Response) {
         try {
             const resp = await mercadoService.editValor(req.body);
-            res.status(200).json({ success: true, resp, message: 'Valor do Item editado com sucesso!' });
+            res.status(200).json({ success: true, resp, message: 'Valor do Item editado com sucesso' });
         } catch (error) {
             res.status(500).json({ success: false, message: 'Erro ao editar Valor do Item!' });
         }
@@ -45,7 +45,7 @@ const mercadoController = {
     async endShopping(req: Request, res: Response) {
         try {
             const resp = await mercadoService.endShopping(req.body);
-            res.status(200).json({ success: true, resp, message: 'Compras Finalizadas com sucesso!' });
+            res.status(200).json({ success: true, resp, message: 'Compras Finalizadas com sucesso' });
         } catch (error) {
             res.status(500).json({ success: false, message: 'Erro ao finalizar Compras' });
         }
