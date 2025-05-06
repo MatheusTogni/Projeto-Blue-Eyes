@@ -1,7 +1,7 @@
 import pool from '../db';
 
 const tarefaService = {
-    getTarefas: async () => {
+    async getTarefas() {
         try {
             const sql = `
             SELECT "ID_TAREFA", "DESC_TAREFA" FROM "TAREFAS"
@@ -14,7 +14,7 @@ const tarefaService = {
         }
     },
 
-    addTarefa: async (params: any) => {
+    async addTarefa(params: any) {
         try {
             const sql = `
             INSERT INTO "TAREFAS" ("DESC_TAREFA")
@@ -30,7 +30,7 @@ const tarefaService = {
         }
     },
 
-    endTarefa: async (params: any) => {
+    async endTarefa(params: any) {
         try {
             const sql = `
             DELETE FROM "TAREFAS" WHERE "ID_TAREFA" = $1
@@ -44,7 +44,7 @@ const tarefaService = {
         }
     },
 
-    editTarefa: async (params: any) => {
+    async editTarefa(params: any) {
         try {
             const sql = `
             UPDATE "TAREFAS" SET "DESC_TAREFA" = $1

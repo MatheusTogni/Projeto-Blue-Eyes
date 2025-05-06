@@ -96,7 +96,7 @@
 <script lang="ts">
 import Drawer from "@/components/Drawer.vue";
 import { eventBus } from "@/event-bus";
-import type { Tarefa } from '@/interfaces/Tarefas';
+import type { Tarefa } from "@/interfaces/Tarefas";
 export default defineComponent({
   components: {
     Drawer,
@@ -111,14 +111,14 @@ export default defineComponent({
   },
   methods: {
     async getTarefas() {
-      const response = await fetch("http://localhost:3002/tarefa/get-tarefas", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
-      this.tarefas = data.resp;
+      await this.HTTP("get", "/tarefa/get-tarefas")
+        .then((resp) => {
+          this.tarefas = resp.resp;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
     },
 
     async addTarefa() {
@@ -130,53 +130,35 @@ export default defineComponent({
       let params = {
         descricao: this.descricao,
       };
-      try {
-        const response = await fetch("http://localhost:3002/tarefa/add-tarefa", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
+
+      await this.HTTP("post", "/tarefa/add-tarefa", params)
+        .then(async (resp) => {
+          this.descricao = "";
+          await this.getTarefas();
+          eventBus.value.showToast(resp.message, "success");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
         });
-        const data = await response.json();
-        this.descricao = "";
-        await this.getTarefas();
-        if (data.success) {
-          eventBus.value.showToast("Tarefa adicionada com sucesso", "success");
-        } else {
-          eventBus.value.showToast("Erro ao adicionar tarefa", "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro ao adicionar tarefa", "error");
-      }
     },
 
-    async endTarefa(tarefa: { ID_TAREFA: number }) {
+    async endTarefa(tarefa: Tarefa) {
       let params = {
         id_tarefa: tarefa.ID_TAREFA,
       };
-      try {
-        const response = await fetch("http://localhost:3002/tarefa/end-tarefa", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
+      await this.HTTP("post", "/tarefa/end-tarefa", params)
+        .then(async (resp) => {
+          await this.getTarefas();
+          eventBus.value.showToast(resp.message, "success");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
         });
-        const data = await response.json();
-        await this.getTarefas();
-        if (data.success) {
-          eventBus.value.showToast("Tarefa finalizada com sucesso", "success");
-        } else {
-          eventBus.value.showToast("Erro ao finalizar tarefa", "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro ao finalizar tarefa", "error");
-      }
     },
-    openDialogEditDesc(item: { DESC_TAREFA: string; ID_TAREFA: number }) {
+
+    openDialogEditDesc(item: Tarefa) {
       this.selectedItemEdit = { ...item };
       this.confirmEditDesc = true;
 
@@ -185,9 +167,9 @@ export default defineComponent({
       });
     },
 
-    async editTarefa(item: { ID_TAREFA: number; DESC_TAREFA: string }) {
+    async editTarefa(item: Tarefa) {
       if (!item.DESC_TAREFA) {
-        eventBus.value.showToast("Preencha a descrição da tarefa", "info");
+        eventBus.value.showToast("Preencha a nova descrição da tarefa", "info");
         return;
       }
 
@@ -195,27 +177,18 @@ export default defineComponent({
         id_tarefa: item.ID_TAREFA,
         descricao: item.DESC_TAREFA,
       };
-      try {
-        const response = await fetch("http://localhost:3002/tarefa/edit-tarefa", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
+
+      await this.HTTP("post", "/tarefa/edit-tarefa", params)
+        .then(async (resp) => {
+          this.confirmEditDesc = false;
+          this.selectedItemEdit = {} as Tarefa;
+          await this.getTarefas();
+          eventBus.value.showToast(resp.message, "success");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
         });
-        const data = await response.json();
-        this.confirmEditDesc = false;
-        this.selectedItemEdit = {} as { ID_TAREFA: number; DESC_TAREFA: string };
-        await this.getTarefas();
-        if (data.success) {
-          eventBus.value.showToast("Tarefa editada com sucesso", "success");
-        } else {
-          eventBus.value.showToast("Erro ao editar tarefa", "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro ao editar tarefa", "error");
-      }
     },
   },
 
