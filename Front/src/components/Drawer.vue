@@ -27,31 +27,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-import { useRouter } from "vue-router";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  setup() {
-    const router = useRouter();
-    const drawer = ref(false);
+  data() {
+    return {
+      drawer: false,
+      menuItems: [
+        { title: "Gastos", icon: "mdi-cash", route: "/gastos" },
+        { title: "Tarefas", icon: "mdi-clipboard-check-outline", route: "/tarefas" },
+        { title: "Mercado", icon: "mdi-cart-variant", route: "/mercado" },
+        { title: "Sair", icon: "mdi-logout", route: "/login" },
+      ],
+    };
+  },
 
-    const menuItems = [
-      { title: "Gastos", icon: "mdi-cash", route: "/gastos" },
-      { title: "Tarefas", icon: "mdi-clipboard-check-outline", route: "/tarefas" },
-      { title: "Mercado", icon: "mdi-cart-variant", route: "/mercado" },
-      { title: "Sair", icon: "mdi-logout", route: "/login" },
-    ];
+  methods: {
+    navigate(route: string) {
+      this.drawer = false;
+      this.$router.push(route);
+    },
 
-    function navigate(route: string) {
-      drawer.value = false; 
-      router.push(route); 
-    }
-
-    function isActiveRoute(route: string): boolean {
-      return router.currentRoute.value.path === route;
-    }
-
-    return { drawer, menuItems, navigate, isActiveRoute };
+    isActiveRoute(route: string): boolean {
+      return this.$route.path === route;
+    },
   },
 });
 </script>
@@ -68,8 +67,8 @@ export default defineComponent({
   font-size: 18px;
 }
 .active-route {
-  background-color: rgba(51, 179, 179, 0.1); 
-  border-left: 4px solid #33b3b3; 
+  background-color: rgba(51, 179, 179, 0.1);
+  border-left: 4px solid #33b3b3;
   border-radius: 4px;
 }
 </style>

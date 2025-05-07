@@ -6,8 +6,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: setupLayouts([
     ...routes,
-    { path: '/', redirect: '/gastos' }, 
-    { path: '/gastos', component: () => import('../pages/gastos.vue') }, 
+    { path: '/', redirect: '/login' },
   ]),
 });
 

@@ -1,14 +1,15 @@
 import pool from '../db';
 
 const gastoService = {
-  addGasto: async (params: any) => {
+  async addGasto(params: any) {
+    console.log(params)
     try {
       const sql = `
-        INSERT INTO "GASTOS" ("DESC_GASTO", "VALOR_GASTO", "DATA_GASTO")
-        VALUES ($1, $2, $3)
+        INSERT INTO "GASTOS" ("DESC_GASTO", "VALOR_GASTO")
+        VALUES ($1, $2)
         RETURNING *;
       `;
-      const values = [params.descricao, params.valor, params.data];
+      const values = [params.descricao, params.valor];
       const resp = await pool.query(sql, values);
 
       return resp.rows[0];
@@ -18,7 +19,7 @@ const gastoService = {
     }
   },
 
-  deleteGasto: async (params: any) => {
+  async deleteGasto(params: any) {
     try {
       const sql = `
         DELETE FROM "GASTOS" WHERE "ID_GASTO" = $1
@@ -33,7 +34,7 @@ const gastoService = {
     }
   },
 
-  getGastos: async () => {
+  async getGastos() {
     try {
       const sql = `
         SELECT "DESC_GASTO", "VALOR_GASTO", "ID_GASTO" FROM "GASTOS"
@@ -46,7 +47,7 @@ const gastoService = {
     }
   },
 
-  editGasto: async (params: any) => {
+  async editGasto(params: any) {
     try {
       const sql = `
         UPDATE "GASTOS" 
@@ -63,7 +64,7 @@ const gastoService = {
     }
   },
 
-  editValorGasto: async (params: any) => {
+  async editValorGasto(params: any) {
     try {
       const sql = `
         UPDATE "GASTOS" 

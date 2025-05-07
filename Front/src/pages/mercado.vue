@@ -52,7 +52,6 @@
                 prepend-inner-icon="mdi-cart-arrow-down"
                 v-model="descricao"
                 hide-details
-                single-line
                 @keydown.enter="addItem"
               ></v-text-field>
             </v-col>
@@ -66,7 +65,6 @@
                 prepend-inner-icon="mdi-cash"
                 v-model="valor"
                 hide-details
-                single-line
                 @input="handleInput"
                 @keydown.enter="addItem"
               />
@@ -134,7 +132,6 @@
             v-model="selectedItemEdit.DESC_MERCADO"
             hide-details
             @keydown.enter="selectedItemEdit && editItem(selectedItemEdit)"
-            single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
             <v-btn
@@ -183,7 +180,6 @@
             hide-details
             @input="handleInputValue"
             @keydown.enter="selectedValueEdit && editValor(selectedValueEdit)"
-            single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
             <v-btn
@@ -471,7 +467,7 @@ export default defineComponent({
 }
 
 .scrollable-list {
-  max-height: 400px;
+  max-height: 332px;
   overflow-y: auto;
   padding-right: 4px;
 }

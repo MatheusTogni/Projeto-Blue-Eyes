@@ -38,8 +38,7 @@
                 prepend-inner-icon="mdi-text-box"
                 v-model="descricao"
                 hide-details
-                @keydown.enter="addTarefa"
-                single-line
+                @keydown.enter="addTarefa"               
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="1" lg="1" class="text-center">
@@ -71,7 +70,6 @@
             v-model="selectedItemEdit.DESC_TAREFA"
             hide-details
             @keydown.enter="editTarefa(selectedItemEdit)"
-            single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
             <v-btn
@@ -247,7 +245,7 @@ export default defineComponent({
 }
 
 .scrollable-list {
-  max-height: 400px;
+  max-height: 532px;
   overflow-y: auto;
   padding-right: 4px;
 }

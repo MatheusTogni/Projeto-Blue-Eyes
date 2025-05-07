@@ -49,7 +49,6 @@
                 prepend-inner-icon="mdi-text-box"
                 v-model="descricao"
                 hide-details
-                single-line
                 @keydown.enter="addGasto"
               ></v-text-field>
             </v-col>
@@ -63,7 +62,6 @@
                 prepend-inner-icon="mdi-cash"
                 v-model="valor"
                 hide-details
-                single-line
                 @input="handleInput"
                 @keydown.enter="addGasto"
               />
@@ -118,7 +116,6 @@
             v-model="selectedItemEdit.DESC_GASTO"
             hide-details
             @keydown.enter="editGasto(selectedItemEdit)"
-            single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
             <v-btn
@@ -149,8 +146,8 @@
             prepend-inner-icon="mdi-cash"
             v-model="selectedValueEdit.VALOR_GASTO"
             hide-details
+            @input="handleInputValueGasto"
             @keydown.enter="editValor(selectedValueEdit)"
-            single-line
           />
           <v-card-actions class="d-flex justify-end mt-4">
             <v-btn
@@ -173,10 +170,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from "vue";
 import Drawer from "@/components/Drawer.vue";
 import { eventBus } from "@/event-bus";
-import type { Gasto } from '@/interfaces/Gasto';
+import type { Gasto } from "@/interfaces/Gasto";
 
 export default defineComponent({
   components: {
@@ -185,8 +182,8 @@ export default defineComponent({
   data() {
     return {
       descricao: "",
-      valor: " " as string,
-      gastos: [] as Gasto[],  
+      valor: "" as string,
+      gastos: [] as Gasto[],
       confirmDelete: false,
       confirmEditDesc: false,
       confirmEditValue: false,
@@ -200,19 +197,17 @@ export default defineComponent({
         DESC_GASTO: "",
         VALOR_GASTO: 0,
         ID_GASTO: 0,
-      } as Gasto,
+      } as any,
     };
   },
 
   computed: {
     totalGastos(): string {
-      // Soma os valores como números
       const total = this.gastos.reduce(
         (sum, gasto) => sum + Number(gasto.VALOR_GASTO),
         0
       );
 
-      // Formata o total como moeda brasileira
       return total.toLocaleString("pt-BR", {
         style: "currency",
         currency: "BRL",
@@ -222,11 +217,11 @@ export default defineComponent({
 
   methods: {
     formatCurrency(value: string | number): string {
-      const numberValue = Number(value.toString().replace(/\D/g, "")) / 100; // Remove caracteres não numéricos e divide por 100
+      const numberValue = Number(value.toString().replace(/\D/g, "")) / 100;
       return numberValue
         .toLocaleString("pt-BR", {
-          style: "currency",
-          currency: "BRL",
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
         })
         .replace("R$", "")
         .trim();
@@ -235,6 +230,11 @@ export default defineComponent({
     handleInput(event: Event) {
       const input = event.target as HTMLInputElement;
       this.valor = this.formatCurrency(input.value);
+    },
+
+    handleInputValueGasto(event: Event) {
+      const input = event.target as HTMLInputElement;
+      this.selectedValueEdit.VALOR_GASTO = this.formatCurrency(input.value);
     },
 
     async addGasto() {
@@ -249,43 +249,27 @@ export default defineComponent({
       let params = {
         descricao: this.descricao,
         valor: valorNumerico,
-        data: new Date().toISOString().slice(0, 10),
       };
 
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/add-gasto", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(params),
+      await this.HTTP("post", "/gasto/add-gasto", params)
+        .then(async (resp) => {
+          await this.getAllGastos();
+          eventBus.value.showToast(resp.message, "success");
+          this.descricao = "";
+          this.valor = "";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
         });
-
-        const data = await resp.json();
-        await this.getAllGastos();
-        this.descricao = "";
-        this.valor = "";
-        if (data.success) {
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao adicionar gasto.", "error");
-      }
     },
 
-    openDialog(item: { DESC_GASTO: string; VALOR_GASTO: number; ID_GASTO: number }) {
+    openDialog(item: Gasto) {
       this.selectedItem = item;
       this.confirmDelete = true;
     },
 
-    openDialogEditDesc(item: {
-      DESC_GASTO: string;
-      VALOR_GASTO: number;
-      ID_GASTO: number;
-    }) {
+    openDialogEditDesc(item: Gasto) {
       this.selectedItemEdit = { ...item };
       this.confirmEditDesc = true;
 
@@ -294,11 +278,7 @@ export default defineComponent({
       });
     },
 
-    openDialogEditValue(item: {
-      DESC_GASTO: string;
-      VALOR_GASTO: number;
-      ID_GASTO: number;
-    }) {
+    openDialogEditValue(item: Gasto) {
       this.selectedValueEdit = { ...item };
       this.confirmEditValue = true;
 
@@ -307,108 +287,77 @@ export default defineComponent({
       });
     },
 
-    async editGasto(item: { DESC_GASTO: string; VALOR_GASTO: number; ID_GASTO: number }) {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/edit-gasto", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(item),
-        });
-        const data = await resp.json();
-        await this.getAllGastos();
-        this.confirmEditDesc = false;
-        if (data.success) {
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao editar gasto.", "error");
-      }
-    },
-
-    async editValor(item: { DESC_GASTO: string; VALOR_GASTO: number; ID_GASTO: number }) {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/edit-valor", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(item),
-        });
-        const data = await resp.json();
-        await this.getAllGastos();
-        this.confirmEditValue = false;
-        if (data.success) {
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao editar valor.", "error");
-      }
-    },
-
-    async deleteGasto(item: {
-      DESC_GASTO: string;
-      VALOR_GASTO: number;
-      ID_GASTO: number;
-    }) {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/delete-gasto", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ id: item.ID_GASTO }),
-        });
-
-        const data = await resp.json();
-        if (data.success) {
+    async editGasto(item: Gasto) {
+      await this.HTTP("post", "/gasto/edit-gasto", item)
+        .then(async (resp) => {
           await this.getAllGastos();
-          eventBus.value.showToast(data.message, "success");
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-        this.selectedItem = null;
-        this.confirmDelete = false;
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao deletar gasto.", "error");
+          eventBus.value.showToast(resp.message, "success");
+          this.confirmEditDesc = false;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
+    },
+
+    async editValor(item: Gasto) {
+      const valorFormatado = this.selectedValueEdit.VALOR_GASTO?.toString() || "";
+      const valorNumerico = Number(
+        valorFormatado.replace(/\s/g, "").replace(/\./g, "").replace(",", ".")
+      );
+
+      if (!valorNumerico || valorNumerico === 0) {
+        eventBus.value.showToast("Por favor preencha o novo valor do gasto", "info");
+        return;
       }
+
+      item.VALOR_GASTO = valorNumerico;
+
+      await this.HTTP("post", "/gasto/edit-valor", item)
+        .then(async (resp) => {
+          await this.getAllGastos();
+          this.confirmEditValue = false;
+          eventBus.value.showToast(resp.message, "success");
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
+    },
+
+    async deleteGasto(item: Gasto) {
+      let params = {
+        id: item.ID_GASTO,
+      };
+
+      await this.HTTP("delete", "/gasto/delete-gasto", params)
+        .then(async (resp) => {
+          await this.getAllGastos();
+          eventBus.value.showToast(resp.message, "success");
+          this.selectedItem = null;
+          this.confirmDelete = false;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
     },
 
     async getAllGastos() {
-      try {
-        const resp = await fetch("http://localhost:3002/gasto/get-gastos", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await resp.json();
-        if (data.success) {
-          this.gastos = data.resp
-            .map(
-              (gasto: { ID_GASTO: number; DESC_GASTO: string; VALOR_GASTO: number }) => ({
-                ID_GASTO: gasto.ID_GASTO,
-                DESC_GASTO: gasto.DESC_GASTO,
-                VALOR_GASTO: gasto.VALOR_GASTO,
-              })
-            )
+      await this.HTTP("get", "/gasto/get-gastos")
+        .then(async (resp) => {
+          this.gastos = resp.resp
+            .map((gasto: Gasto) => ({
+              ID_GASTO: gasto.ID_GASTO,
+              DESC_GASTO: gasto.DESC_GASTO,
+              VALOR_GASTO: gasto.VALOR_GASTO,
+            }))
             .sort((a: any, b: any) => a.ID_GASTO - b.ID_GASTO);
-        } else {
-          eventBus.value.showToast(data.message, "error");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        eventBus.value.showToast("Erro desconhecido ao buscar gastos.", "error");
-      }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          eventBus.value.showToast(error.message, "error");
+        });
     },
   },
   async mounted() {

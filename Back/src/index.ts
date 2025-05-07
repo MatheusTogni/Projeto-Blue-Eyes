@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import gastoRoutes from "./routes/gastoRouter"
 import tarefaRouter from "./routes/tarefaRouter"
 import mercadoRoutes from "./routes/mercadoRouter"
+import loginRoutes from "./routes/loginRouter"
 
 dotenv.config();
 
@@ -15,11 +16,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT;
 
 app.use("/gasto", gastoRoutes);
 app.use("/tarefa", tarefaRouter)
 app.use("/mercado", mercadoRoutes);
+app.use("/login", loginRoutes)
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
