@@ -76,6 +76,7 @@
                 color="#33b3b3"
                 block
                 size="large"
+                :loading="loading"
                 elevation="2"
                 fab
                 @click="addItem"
@@ -85,6 +86,7 @@
 
             <v-col cols="12" md="1" lg="1" class="text-center">
               <v-btn
+                :loading="loading"
                 class="add-button"
                 color="success"
                 block
@@ -110,6 +112,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #f44336; color: white"
               @click="selectedItem && deleteItem(selectedItem)"
             >
@@ -141,6 +144,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #33b3b3; color: white"
               @click="selectedItemEdit && editItem(selectedItemEdit)"
             >
@@ -159,7 +163,7 @@
             >
               Cancelar
             </v-btn>
-            <v-btn style="background-color: #33b3b3; color: white" @click="endShopping">
+            <v-btn :loading="loading" style="background-color: #33b3b3; color: white" @click="endShopping">
               Confirmar
             </v-btn>
           </v-card-actions>
@@ -189,6 +193,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #33b3b3; color: white"
               @click="selectedValueEdit && editValor(selectedValueEdit)"
             >
@@ -211,6 +216,7 @@ export default defineComponent({
   },
   data() {
     return {
+      loading: false,
       descricao: "",
       valor: "",
       items: [] as Mercado[],
@@ -285,6 +291,7 @@ export default defineComponent({
     },
 
     async editItem(item: Mercado) {
+      this.loading = true
       if (
         !this.selectedItemEdit.DESC_MERCADO ||
         this.selectedItemEdit.DESC_MERCADO.trim() === ""
@@ -297,27 +304,33 @@ export default defineComponent({
           eventBus.value.showToast(resp.message, "success");
           this.confirmEditDesc = false;
           await this.getAllItems();
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
     async deleteItem(item: Mercado) {
+      this.loading = true
       await this.HTTP("delete", "/mercado/delete-item", item)
         .then(async (resp) => {
           eventBus.value.showToast(resp.message, "success");
           this.confirmDelete = false;
           await this.getAllItems();
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
     async editValor(item: Mercado) {
+      this.loading = true
       const valorFormatado = this.selectedValueEdit.VALOR_MERCADO?.toString() || "";
       const valorNumerico = Number(
         valorFormatado.replace(/\s/g, "").replace(/\./g, "").replace(",", ".")
@@ -335,14 +348,17 @@ export default defineComponent({
           eventBus.value.showToast(resp.message, "success");
           this.confirmEditValue = false;
           await this.getAllItems();
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
     async addItem() {
+      this.loading = true
       const valorNumerico = this.valor
         ? Number(this.valor.replace(/\./g, "").replace(",", "."))
         : 0;
@@ -361,10 +377,12 @@ export default defineComponent({
           eventBus.value.showToast(resp.message, "success");
           this.getAllItems();
           (this.descricao = ""), (this.valor = "");
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
@@ -379,6 +397,7 @@ export default defineComponent({
     },
 
     async endShopping() {
+      this.loading = true
       let params = {
         total: this.total.toFixed(2),
       };
@@ -387,10 +406,12 @@ export default defineComponent({
           eventBus.value.showToast(resp.message, "success");
           this.getAllItems();
           this.confirmEndShopping = false;
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
   },

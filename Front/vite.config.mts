@@ -66,24 +66,26 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,png,svg,ico,json}'],
       },
       manifest: {
-        name: 'Meu App PWA',
+        name: 'Blue Eyes',
         short_name: 'Blue Eyes',
-        description: 'Um app Vue 3 com Vuetify e PWA!',
-        theme_color: '#4DBA87',
+        description: 'Blue Eyes',
+        theme_color: '#1A1A1A',
         background_color: '#ffffff',
         display: 'standalone',
         start_url: '.',
         scope: '.',
         icons: [
           {
-            src: 'pwa-256x256.png',
-            sizes: '256x256',
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
             type: 'image/png',
+            purpose: 'maskable'
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
+            purpose: 'maskable'
           },
         ],
       },

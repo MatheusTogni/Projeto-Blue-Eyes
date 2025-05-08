@@ -74,6 +74,7 @@
                 block
                 size="large"
                 elevation="2"
+                :loading="loading"
                 fab
                 @click="addGasto"
                 >+</v-btn
@@ -94,6 +95,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #f44336; color: white"
               @click="selectedItem && deleteGasto(selectedItem)"
             >
@@ -125,6 +127,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #33b3b3; color: white"
               @click="editGasto(selectedItemEdit)"
             >
@@ -157,6 +160,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #33b3b3; color: white"
               @click="editValor(selectedValueEdit)"
             >
@@ -182,6 +186,7 @@ export default defineComponent({
   data() {
     return {
       descricao: "",
+      loading: false,
       valor: "" as string,
       gastos: [] as Gasto[],
       confirmDelete: false,
@@ -238,6 +243,7 @@ export default defineComponent({
     },
 
     async addGasto() {
+      this.loading = true
       const valorNumerico = this.valor
         ? Number(this.valor.replace(/\./g, "").replace(",", "."))
         : 0;
@@ -257,10 +263,12 @@ export default defineComponent({
           eventBus.value.showToast(resp.message, "success");
           this.descricao = "";
           this.valor = "";
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
@@ -288,19 +296,23 @@ export default defineComponent({
     },
 
     async editGasto(item: Gasto) {
+      this.loading = true
       await this.HTTP("post", "/gasto/edit-gasto", item)
         .then(async (resp) => {
           await this.getAllGastos();
           eventBus.value.showToast(resp.message, "success");
           this.confirmEditDesc = false;
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
     async editValor(item: Gasto) {
+      this.loading = true
       const valorFormatado = this.selectedValueEdit.VALOR_GASTO?.toString() || "";
       const valorNumerico = Number(
         valorFormatado.replace(/\s/g, "").replace(/\./g, "").replace(",", ".")
@@ -318,14 +330,17 @@ export default defineComponent({
           await this.getAllGastos();
           this.confirmEditValue = false;
           eventBus.value.showToast(resp.message, "success");
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
     async deleteGasto(item: Gasto) {
+      this.loading = true
       let params = {
         id: item.ID_GASTO,
       };
@@ -336,10 +351,12 @@ export default defineComponent({
           eventBus.value.showToast(resp.message, "success");
           this.selectedItem = null;
           this.confirmDelete = false;
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 

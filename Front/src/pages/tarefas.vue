@@ -47,6 +47,7 @@
                 color="#33b3b3"
                 block
                 size="large"
+                :loading="loading"
                 elevation="2"
                 fab
                 @click="addTarefa"
@@ -79,6 +80,7 @@
               Cancelar
             </v-btn>
             <v-btn
+              :loading="loading"
               style="background-color: #33b3b3; color: white"
               @click="editTarefa(selectedItemEdit)"
             >
@@ -102,6 +104,7 @@ export default defineComponent({
   data() {
     return {
       descricao: "",
+      loading: false,
       confirmEditDesc: false,
       selectedItemEdit: {} as Tarefa,
       tarefas: [] as Tarefa[],
@@ -120,6 +123,7 @@ export default defineComponent({
     },
 
     async addTarefa() {
+      this.loading = true
       if (!this.descricao) {
         eventBus.value.showToast("Preencha a descrição da tarefa", "info");
         return;
@@ -134,10 +138,12 @@ export default defineComponent({
           this.descricao = "";
           await this.getTarefas();
           eventBus.value.showToast(resp.message, "success");
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
 
@@ -166,6 +172,7 @@ export default defineComponent({
     },
 
     async editTarefa(item: Tarefa) {
+      this.loading = true
       if (!item.DESC_TAREFA) {
         eventBus.value.showToast("Preencha a nova descrição da tarefa", "info");
         return;
@@ -182,10 +189,12 @@ export default defineComponent({
           this.selectedItemEdit = {} as Tarefa;
           await this.getTarefas();
           eventBus.value.showToast(resp.message, "success");
+          this.loading = false
         })
         .catch((error) => {
           console.error("Error:", error);
           eventBus.value.showToast(error.message, "error");
+          this.loading = false
         });
     },
   },

@@ -11,8 +11,10 @@ dotenv.config();
 const app = express();
 
 app.use(cors({
-  origin: "http://localhost:3000",
-  methods: ["GET", "POST", "DELETE", "PUT", "PATCH"], 
+  origin: [
+    "https://blue-eyes-front.vercel.app" 
+  ],
+  methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
 }));
 app.use(express.json());
 

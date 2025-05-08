@@ -43,6 +43,7 @@
 
         <v-btn
           block
+          :loading="loading"
           size="large"
           color="#33b3b3"
           class="login-button mt-8"
@@ -64,6 +65,7 @@ import { eventBus } from "@/event-bus";
 export default defineComponent({
   data() {
     return {
+      loading: false,
       login: "",
       senha: "",
       showPassword: false,
@@ -76,16 +78,17 @@ export default defineComponent({
     },
 
     async realizarLogin() {
+      this.loading = true;
       await this.HTTP("post", "/login/login", {
         login: this.login,
         senha: this.senha,
       })
-        .then((resp) => {
-          console.log(resp.login);
-          console.log(resp.message);
+        .then(() => {
+          this.loading = false;
           this.$router.push("/gastos");
         })
         .catch(() => {
+          this.loading = false;
           eventBus.value.showToast(
             "Erro Fazer Login, verifique se o Usuário e a Senha estão Corretos!",
             "info"
